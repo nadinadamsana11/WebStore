@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebStore - Web Applications Directory</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- React 18 & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+    <!-- Babel Standalone for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- React Root Mount Container -->
+    <div id="root"></div>
+
+    <script type="text/babel">
+        /**
+         * =========================================================================
+         *  WEB APPLICATIONS DATA ARRAY (Easily add or modify apps here in JS)
+         * =========================================================================
+         *  To add a new Web App, copy any item below and fill in the details:
+         * 
+         *  {
+         *    id: 'app-unique-id',
+         *    title: 'App Name',
+         *    url: 'https://example.com',
+         *    category: 'Category Name', // Matches one of the categories below
+         *    icon: 'fa-solid fa-globe', // FontAwesome class or Emoji
+         *    bgColor: 'from-blue-500 to-indigo-600', // Tailwind gradient
+         *    desc: 'Short description of the web application.',
+         *    rating: 4.8,
+         *    reviews: 1200,
+         *    featured: true // optional
+         *  }
+         */
+        const WEB_APPS = [
+            {
+                id: 'app-1',
+                title: 'ChatGPT',
+                url: 'https://chatgpt.com',
+                category: 'AI Tools',
+                icon: 'fa-solid fa-robot',
+                bgColor: 'from-emerald-500 to-teal-700',
+                desc: 'Leading AI conversational agent for writing, code generation, problem-solving, and research.',
+                rating: 4.9,
+                reviews: 12500,
+                featured: true
+            },
+            {
+                id: 'app-2',
+                title: 'GitHub',
+                url: 'https://github.com',
+                category: 'Development',
+                icon: 'fa-brands fa-github',
+                bgColor: 'from-slate-700 to-slate-900',
+                desc: 'World\'s largest platform for developer collaboration, code hosting, and version control.',
+                rating: 4.9,
+                reviews: 9800,
+                featured: true
+            },
+            {
+                id: 'app-3',
+                title: 'Canva',
+                url: 'https://canva.com',
+                category: 'Design',
+                icon: 'fa-solid fa-palette',
+                bgColor: 'from-cyan-500 to-blue-600',
+                desc: 'User-friendly online design platform for social media graphics, presentations, and posters.',
+                rating: 4.8,
+                reviews: 8400,
+                featured: true
+            },
+            {
+                id: 'app-4',
+                title: 'Claude AI',
+                url: 'https://claude.ai',
+                category: 'AI Tools',
+                icon: 'fa-solid fa-brain',
+                bgColor: 'from-amber-600 to-orange-700',
+                desc: 'Next-generation AI assistant built by Anthropic for deep analysis, coding, and reasoning.',
+                rating: 4.9,
+                reviews: 4100,
+                featured: true
+            },
+            {
+                id: 'app-5',
+                title: 'YouTube',
+                url: 'https://youtube.com',
+                category: 'Entertainment',
+                icon: 'fa-brands fa-youtube',
+                bgColor: 'from-red-500 to-rose-700',
+                desc: 'The global leader in video streaming, educational tutorials, music videos, and live broadcasts.',
+                rating: 4.8,
+                reviews: 25000,
+                featured: false
+            },
+            {
+                id: 'app-6',
+                title: 'Notion',
+                url: 'https://notion.so',
+                category: 'Productivity',
+                icon: 'fa-solid fa-note-sticky',
+                bgColor: 'from-slate-800 to-zinc-900',
+                desc: 'All-in-one connected workspace for note-taking, project tracking, docs, and knowledge bases.',
+                rating: 4.8,
+                reviews: 6200,
+                featured: false
+            },
+            {
+                id: 'app-7',
+                title: 'Figma',
+                url: 'https://figma.com',
+                category: 'Design',
+                icon: 'fa-solid fa-vector-square',
+                bgColor: 'from-purple-500 to-pink-600',
+                desc: 'Collaborative web-based interface design and prototyping tool used by top digital teams.',
+                rating: 4.9,
+                reviews: 7300,
+                featured: false
+            },
+            {
+                id: 'app-8',
+                title: 'Google Drive',
+                url: 'https://drive.google.com',
+                category: 'Productivity',
+                icon: 'fa-brands fa-google-drive',
+                bgColor: 'from-blue-500 to-amber-500',
+                desc: 'Secure cloud storage, document management, and file sharing accessible anywhere.',
+                rating: 4.7,
+                reviews: 18000,
+                featured: false
+            },
+            {
+                id: 'app-9',
+                title: 'Stack Overflow',
+                url: 'https://stackoverflow.com',
+                category: 'Development',
+                icon: 'fa-brands fa-stack-overflow',
+                bgColor: 'from-orange-500 to-amber-600',
+                desc: 'The premier Q&A community for programmers, software engineers, and technology professionals.',
+                rating: 4.7,
+                reviews: 8900,
+                featured: false
+            },
+            {
+                id: 'app-10',
+                title: 'Duolingo',
+                url: 'https://duolingo.com',
+                category: 'Education',
+                icon: 'fa-solid fa-language',
+                bgColor: 'from-green-500 to-emerald-600',
+                desc: 'Fun, gamified language learning web platform supporting dozens of world languages.',
+                rating: 4.7,
+                reviews: 5400,
+                featured: false
+            },
+            {
+                id: 'app-11',
+                title: 'Spotify',
+                url: 'https://open.spotify.com',
+                category: 'Entertainment',
+                icon: 'fa-brands fa-spotify',
+                bgColor: 'from-emerald-600 to-green-800',
+                desc: 'Stream millions of songs, podcasts, and audio tracks with personalized recommendations.',
+                rating: 4.8,
+                reviews: 14200,
+                featured: false
+            },
+            {
+                id: 'app-12',
+                title: 'CodePen',
+                url: 'https://codepen.io',
+                category: 'Development',
+                icon: 'fa-brands fa-codepen',
+                bgColor: 'from-blue-600 to-indigo-800',
+                desc: 'Online front-end web development playground to build, test, and showcase HTML/CSS/JS.',
+                rating: 4.6,
+                reviews: 3100,
+                featured: false
+            },
+            {
+                id: 'app-13',
+                title: 'Reddit',
+                url: 'https://reddit.com',
+                category: 'Social Media',
+                icon: 'fa-brands fa-reddit-alien',
+                bgColor: 'from-orange-600 to-red-600',
+                desc: 'Vast network of communities where people dive into their interests, hobbies, and news.',
+                rating: 4.5,
+                reviews: 11200,
+                featured: false
+            },
+            {
+                id: 'app-14',
+                title: 'Wikipedia',
+                url: 'https://wikipedia.org',
+                category: 'Education',
+                icon: 'fa-solid fa-book-open',
+                bgColor: 'from-slate-500 to-slate-700',
+                desc: 'Free multilingual online encyclopedia written and maintained by a community of volunteers.',
+                rating: 4.7,
+                reviews: 9500,
+                featured: false
+            },
+            {
+                id: 'app-15',
+                title: 'LinkedIn',
+                url: 'https://linkedin.com',
+                category: 'Social Media',
+                icon: 'fa-brands fa-linkedin',
+                bgColor: 'from-blue-600 to-blue-800',
+                desc: 'World’s largest professional network to find jobs, build career connections, and share insights.',
+                rating: 4.6,
+                reviews: 13500,
+                featured: false
+            },
+            {
+                id: 'app-16',
+                title: 'Vercel',
+                url: 'https://vercel.com',
+                category: 'Development',
+                icon: 'fa-solid fa-triangle-circle-square',
+                bgColor: 'from-zinc-800 to-black',
+                desc: 'Cloud platform for static sites and Serverless Functions tailored for React, Next.js, and modern web.',
+                rating: 4.9,
+                reviews: 2800,
+                featured: false
+            }
+        ];
+
+        const CATEGORIES = [
+            { id: 'all', name: 'All Web Apps', icon: 'fa-border-all' },
+            { id: 'favorites', name: 'Favorites', icon: 'fa-heart text-rose-500' },
+            { id: 'AI Tools', name: 'AI Tools', icon: 'fa-robot' },
+            { id: 'Productivity', name: 'Productivity', icon: 'fa-briefcase' },
+            { id: 'Development', name: 'Development', icon: 'fa-code' },
+            { id: 'Design', name: 'Design', icon: 'fa-palette' },
+            { id: 'Entertainment', name: 'Entertainment', icon: 'fa-gamepad' },
+            { id: 'Education', name: 'Education', icon: 'fa-graduation-cap' },
+            { id: 'Social Media', name: 'Social Media', icon: 'fa-share-nodes' }
+        ];
+
+        const { useState, useEffect, useMemo } = React;
+
+        function App() {
+            // State
+            const [apps, setApps] = useState(WEB_APPS);
+            const [activeCategory, setActiveCategory] = useState('all');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [sortBy, setSortBy] = useState('popular');
+            const [favorites, setFavorites] = useState(() => {
+                try {
+                    const saved = localStorage.getItem('webstore_favorites');
+                    return saved ? JSON.parse(saved) : [];
+                } catch(e) {
+                    return [];
+                }
+            });
+            const [isDarkMode, setIsDarkMode] = useState(() => {
+                try {
+                    const savedTheme = localStorage.getItem('theme');
+                    return savedTheme ? savedTheme === 'dark' : true;
+                } catch(e) {
+                    return true;
+                }
+            });
+            const [selectedApp, setSelectedApp] = useState(null);
+            const [toastMessage, setToastMessage] = useState(null);
+
+            // Sync Dark Mode Class
+            useEffect(() => {
+                if (isDarkMode) {
+                    document.documentElement.classList.add('dark');
+                    try { localStorage.setItem('theme', 'dark'); } catch(e) {}
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    try { localStorage.setItem('theme', 'light'); } catch(e) {}
+                }
+            }, [isDarkMode]);
+
+            // Save Favorites
+            useEffect(() => {
+                try {
+                    localStorage.setItem('webstore_favorites', JSON.stringify(favorites));
+                } catch(e) {}
+            }, [favorites]);
+
+            // Toast Trigger
+            const showToast = (msg) => {
+                setToastMessage(msg);
+                setTimeout(() => {
+                    setToastMessage(null);
+                }, 2500);
+            };
+
+            // Toggle Favorite
+            const toggleFavorite = (appId, e) => {
+                if (e) e.stopPropagation();
+                if (favorites.includes(appId)) {
+                    setFavorites(prev => prev.filter(id => id !== appId));
+                    showToast('Removed from Favorites');
+                } else {
+                    setFavorites(prev => [...prev, appId]);
+                    showToast('Saved to Favorites!');
+                }
+            };
+
+            // Filter & Sort Logic
+            const filteredApps = useMemo(() => {
+                let list = [...apps];
+
+                // Category Filter
+                if (activeCategory === 'favorites') {
+                    list = list.filter(app => favorites.includes(app.id));
+                } else if (activeCategory !== 'all') {
+                    list = list.filter(app => app.category === activeCategory);
+                }
+
+                // Search Query Filter
+                if (searchQuery.trim()) {
+                    const q = searchQuery.toLowerCase();
+                    list = list.filter(app =>
+                        app.title.toLowerCase().includes(q) ||
+                        app.desc.toLowerCase().includes(q) ||
+                        app.category.toLowerCase().includes(q)
+                    );
+                }
+
+                // Sort
+                if (sortBy === 'rating') {
+                    list.sort((a, b) => b.rating - a.rating);
+                } else if (sortBy === 'name') {
+                    list.sort((a, b) => a.title.localeCompare(b.title));
+                } else {
+                    // Popularity (Reviews count)
+                    list.sort((a, b) => b.reviews - a.reviews);
+                }
+
+                return list;
+            }, [apps, activeCategory, searchQuery, sortBy, favorites]);
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {/* Header */}
+                    <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 glass-panel border-b border-slate-200 dark:border-slate-800 transition-colors">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex items-center justify-between h-16 gap-4">
+                                
+                                {/* Brand Logo */}
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                                        <i className="fa-solid fa-compass text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h1 className="font-extrabold text-lg leading-tight tracking-tight bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent">
+                                            WebStore
+                                        </h1>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-wide">WEB APP DIRECTORY</p>
+                                    </div>
+                                </div>
+
+                                {/* Desktop Search Input */}
+                                <div className="hidden md:flex flex-1 max-w-md mx-4">
+                                    <div className="relative w-full">
+                                        <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                        <input 
+                                            type="text" 
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            placeholder="Search web applications or tools..." 
+                                            className="w-full pl-10 pr-10 py-2 bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-400 text-slate-800 dark:text-slate-100"
+                                        />
+                                        {searchQuery && (
+                                            <button 
+                                                onClick={() => setSearchQuery('')}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                            >
+                                                <i className="fa-solid fa-circle-xmark"></i>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Header Action Controls */}
+                                <div className="flex items-center gap-2">
+                                    {/* Favorites Shortcut Button */}
+                                    <button 
+                                        onClick={() => setActiveCategory(prev => prev === 'favorites' ? 'all' : 'favorites')}
+                                        className={`p-2.5 rounded-xl border transition-all relative ${
+                                            activeCategory === 'favorites'
+                                                ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
+                                                : 'border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
+                                        }`}
+                                        title="View Favorites"
+                                    >
+                                        <i className="fa-solid fa-heart text-rose-500"></i>
+                                        {favorites.length > 0 && (
+                                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                                                {favorites.length}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {/* Theme Toggle */}
+                                    <button 
+                                        onClick={() => setIsDarkMode(!isDarkMode)}
+                                        className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all"
+                                        title="Toggle Dark/Light Theme"
+                                    >
+                                        {isDarkMode ? (
+                                            <i className="fa-solid fa-sun text-amber-400"></i>
+                                        ) : (
+                                            <i className="fa-solid fa-moon text-indigo-500"></i>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Mobile Search Input */}
+                            <div className="pb-3 md:hidden">
+                                <div className="relative w-full">
+                                    <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                    <input 
+                                        type="text" 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search web applications..." 
+                                        className="w-full pl-10 pr-10 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    />
+                                    {searchQuery && (
+                                        <button 
+                                            onClick={() => setSearchQuery('')}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                        >
+                                            <i className="fa-solid fa-circle-xmark"></i>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Body Container */}
+                    <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+                        {/* Hero Banner */}
+                        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-700 text-white p-6 sm:p-8 md:p-10 shadow-xl shadow-indigo-900/10">
+                            <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                            <div className="absolute right-1/3 -top-10 w-48 h-48 bg-purple-400/20 rounded-full blur-xl pointer-events-none"></div>
+
+                            <div className="relative z-10 max-w-2xl space-y-3">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md border border-white/20 text-white">
+                                    <i className="fa-solid fa-bolt text-amber-300"></i> Featured Web Hub
+                                </span>
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+                                    Discover & Launch Top Web Applications Instantly
+                                </h2>
+                                <p className="text-slate-200 text-sm sm:text-base leading-relaxed">
+                                    Browse curated online tools, productivity platforms, and web services. One-click access to all your favorite web links.
+                                </p>
+                            </div>
+                        </section>
+
+                        {/* Categories Horizontal Bar */}
+                        <section className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                    <i className="fa-solid fa-layer-group text-blue-500"></i> Categories
+                                </h3>
+                                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                    Showing {filteredApps.length} apps
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar scroll-smooth">
+                                {CATEGORIES.map(cat => {
+                                    const isActive = activeCategory === cat.id;
+                                    return (
+                                        <button 
+                                            key={cat.id}
+                                            onClick={() => setActiveCategory(cat.id)}
+                                            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-2 transition-all shrink-0 ${
+                                                isActive 
+                                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                                                    : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                            }`}
+                                        >
+                                            <i className={`fa-solid ${cat.icon}`}></i>
+                                            <span>{cat.name}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </section>
+
+                        {/* Controls Bar (Sorting & Title) */}
+                        <section className="space-y-4">
+                            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+                                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    {CATEGORIES.find(c => c.id === activeCategory)?.name || 'Web Applications'}
+                                </span>
+
+                                <div className="flex items-center gap-2">
+                                    <label htmlFor="sortSelect" className="text-xs text-slate-500 dark:text-slate-400 font-medium">Sort by:</label>
+                                    <select 
+                                        id="sortSelect"
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700 dark:text-slate-200 font-medium"
+                                    >
+                                        <option value="popular">Most Popular</option>
+                                        <option value="rating">Top Rated</option>
+                                        <option value="name">Name (A-Z)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* App Cards Grid */}
+                            {filteredApps.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                                    {filteredApps.map(app => {
+                                        const isFav = favorites.includes(app.id);
+                                        return (
+                                            <div 
+                                                key={app.id}
+                                                className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col justify-between relative overflow-hidden animate-fade-in"
+                                            >
+                                                <div className="space-y-3">
+                                                    {/* Icon & Favorite Button */}
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${app.bgColor || 'from-blue-500 to-indigo-600'} flex items-center justify-center text-xl shrink-0 shadow-md text-white`}>
+                                                            {app.icon.startsWith('fa-') ? (
+                                                                <i className={app.icon}></i>
+                                                            ) : (
+                                                                <span>{app.icon}</span>
+                                                            )}
+                                                        </div>
+
+                                                        <button 
+                                                            onClick={(e) => toggleFavorite(app.id, e)}
+                                                            className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                                            title="Bookmark Web App"
+                                                        >
+                                                            <i className={isFav ? "fa-solid fa-heart text-rose-500" : "fa-regular fa-heart"}></i>
+                                                        </button>
+                                                    </div>
+
+                                                    {/* App Name & Category */}
+                                                    <div>
+                                                        <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                                            {app.title}
+                                                        </h4>
+                                                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                                            {app.category}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Short Description */}
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                                        {app.desc}
+                                                    </p>
+                                                </div>
+
+                                                {/* Card Actions Footer */}
+                                                <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-1 text-amber-400 text-xs font-semibold">
+                                                        <i className="fa-solid fa-star"></i>
+                                                        <span className="text-slate-700 dark:text-slate-300">{app.rating}</span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1.5">
+                                                        <button 
+                                                            onClick={() => setSelectedApp(app)}
+                                                            className="px-2.5 py-1.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors font-medium"
+                                                        >
+                                                            Details
+                                                        </button>
+                                                        <a 
+                                                            href={app.url} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="px-3 py-1.5 bg-slate-100 hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:hover:bg-blue-600 text-blue-600 dark:text-blue-400 font-semibold text-xs rounded-lg transition-all flex items-center gap-1.5"
+                                                        >
+                                                            <span>Launch</span>
+                                                            <i className="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                /* Empty State */
+                                <div className="text-center py-16 space-y-3">
+                                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-400 text-2xl">
+                                        <i className="fa-solid fa-magnifying-glass"></i>
+                                    </div>
+                                    <h4 className="font-bold text-slate-700 dark:text-slate-300 text-lg">No Applications Found</h4>
+                                    <p className="text-sm text-slate-500 max-w-sm mx-auto">
+                                        No web applications match your search query or selected category filter. Try clearing your search term.
+                                    </p>
+                                </div>
+                            )}
+                        </section>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 transition-colors">
+                        <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                © WebStore Directory — All icons & trademarks belong to their respective web owners.
+                            </p>
+                        </div>
+                    </footer>
+
+                    {/* Modal Details View */}
+                    {selectedApp && (
+                        <div 
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+                            onClick={() => setSelectedApp(null)}
+                        >
+                            <div 
+                                className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative space-y-5"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button 
+                                    onClick={() => setSelectedApp(null)}
+                                    className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 transition-colors"
+                                >
+                                    <i className="fa-solid fa-xmark"></i>
+                                </button>
+
+                                <div className="flex items-start gap-4 pr-6">
+                                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${selectedApp.bgColor || 'from-blue-500 to-indigo-600'} flex items-center justify-center text-2xl shrink-0 shadow-md text-white`}>
+                                        {selectedApp.icon.startsWith('fa-') ? (
+                                            <i className={selectedApp.icon}></i>
+                                        ) : (
+                                            <span>{selectedApp.icon}</span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{selectedApp.title}</h3>
+                                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">{selectedApp.category}</p>
+                                        <div className="flex items-center gap-1.5 mt-1 text-amber-400 text-xs font-semibold">
+                                            <i className="fa-solid fa-star"></i>
+                                            <span className="text-slate-700 dark:text-slate-300">{selectedApp.rating}</span>
+                                            <span className="text-slate-400 font-normal">({selectedApp.reviews.toLocaleString()} User Ratings)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    {selectedApp.desc}
+                                </p>
+
+                                <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400 overflow-hidden">
+                                    <span className="truncate">{selectedApp.url}</span>
+                                    <button 
+                                        onClick={() => {
+                                            try {
+                                                const tempInput = document.createElement('input');
+                                                tempInput.value = selectedApp.url;
+                                                document.body.appendChild(tempInput);
+                                                tempInput.select();
+                                                document.execCommand('copy');
+                                                document.body.removeChild(tempInput);
+                                                showToast('URL Copied to Clipboard!');
+                                            } catch(err) {
+                                                showToast('Copied link');
+                                            }
+                                        }}
+                                        className="ml-2 text-blue-600 dark:text-blue-400 hover:underline shrink-0 font-sans font-semibold flex items-center gap-1"
+                                    >
+                                        <i className="fa-solid fa-copy"></i> Copy
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-3 pt-2">
+                                    <button 
+                                        onClick={(e) => toggleFavorite(selectedApp.id, e)}
+                                        className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-700 dark:text-slate-200"
+                                    >
+                                        <i className={favorites.includes(selectedApp.id) ? "fa-solid fa-heart text-rose-500" : "fa-regular fa-heart text-rose-500"}></i>
+                                        <span>{favorites.includes(selectedApp.id) ? 'Bookmarked' : 'Add Favorite'}</span>
+                                    </button>
+                                    <a 
+                                        href={selectedApp.url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 transition-all"
+                                    >
+                                        <span>Visit Website</span>
+                                        <i className="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Toast Notification Component */}
+                    {toastMessage && (
+                        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-medium animate-fade-in">
+                            <i className="fa-solid fa-circle-check text-emerald-400"></i>
+                            <span>{toastMessage}</span>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
