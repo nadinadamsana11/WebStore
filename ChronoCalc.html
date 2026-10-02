@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Date & Time Calculator Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-200">
+
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                        <i class="fa-solid fa-calendar-days text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-brand-600 to-indigo-600 dark:from-brand-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                            ChronoCalc Pro
+                        </h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Universal Date & Time Precision Toolkit</p>
+                    </div>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- History Toggle Button -->
+                    <button id="history-toggle-btn" onclick="toggleHistoryDrawer()" class="px-3 py-2 text-sm font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span class="hidden md:inline">History</span>
+                        <span id="history-badge" class="bg-brand-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
+                    </button>
+
+                    <!-- Dark Mode Toggle -->
+                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition focus:outline-none" title="Toggle Theme">
+                        <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+        <!-- Responsive Navigation Tabs -->
+        <div class="mb-6 overflow-x-auto pb-2 scrollbar-none">
+            <nav class="flex space-x-2 min-w-max border-b border-slate-200 dark:border-slate-700 pb-2" id="nav-tabs">
+                <button onclick="switchTab('duration')" id="tab-duration" class="tab-btn active-tab px-4 py-2.5 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all bg-brand-600 text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    <span>Duration Between Dates</span>
+                </button>
+                <button onclick="switchTab('addsub')" id="tab-addsub" class="tab-btn inactive-tab px-4 py-2.5 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Add / Subtract Days</span>
+                </button>
+                <button onclick="switchTab('age')" id="tab-age" class="tab-btn inactive-tab px-4 py-2.5 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-cake-candles"></i>
+                    <span>Age & Milestones</span>
+                </button>
+                <button onclick="switchTab('business')" id="tab-business" class="tab-btn inactive-tab px-4 py-2.5 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <span>Business Working Days</span>
+                </button>
+                <button onclick="switchTab('info')" id="tab-info" class="tab-btn inactive-tab px-4 py-2.5 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Day & Date Details</span>
+                </button>
+                <button onclick="switchTab('recurring')" id="tab-recurring" class="tab-btn inactive-tab px-4 py-2.5 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>Recurring Schedule</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- TAB 1: Duration Between Dates -->
+        <div id="content-duration" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Form Inputs -->
+            <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-range text-brand-500"></i>
+                    Calculate Date Difference
+                </h2>
+
+                <form id="duration-form" onsubmit="event.preventDefault(); calculateDuration();" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Start Date & Time</label>
+                        <input type="datetime-local" id="dur-start-date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                        <button type="button" onclick="setNow('dur-start-date')" class="mt-1 text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline">Set to Now</button>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">End Date & Time</label>
+                        <input type="datetime-local" id="dur-end-date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                        <button type="button" onclick="setNow('dur-end-date')" class="mt-1 text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline">Set to Now</button>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl space-y-2 border border-slate-200/60 dark:border-slate-600/60">
+                        <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="dur-include-end" onchange="calculateDuration()" class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+                            <span>Include end day in calculation (+1 day)</span>
+                        </label>
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                        <button type="button" onclick="calculateDuration()" class="flex-1 py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md shadow-brand-500/20 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-calculator"></i> Calculate
+                        </button>
+                        <button type="button" onclick="swapDates('dur-start-date', 'dur-end-date', calculateDuration)" class="p-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition" title="Swap Dates">
+                            <i class="fa-solid fa-arrows-up-down"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Display -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- Primary Result Box -->
+                <div class="bg-gradient-to-br from-brand-600 to-indigo-700 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 opacity-10 text-9xl font-bold">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-semibold tracking-wider uppercase text-brand-200">Total Duration Difference</span>
+                            <button onclick="copyResultText('dur-summary-text')" class="text-xs bg-white/20 hover:bg-white/30 px-2.5 py-1 rounded-lg backdrop-blur transition flex items-center gap-1">
+                                <i class="fa-regular fa-copy"></i> Copy Result
+                            </button>
+                        </div>
+                        <h3 id="dur-summary-text" class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
+                            0 Years, 0 Months, 0 Days
+                        </h3>
+                        <p id="dur-time-breakdown" class="text-sm text-brand-100 font-medium">
+                            0 Hours, 0 Minutes, 0 Seconds
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Expanded Metrics Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Days</div>
+                        <div id="m-total-days" class="text-xl font-bold text-slate-900 dark:text-white mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Weeks</div>
+                        <div id="m-total-weeks" class="text-xl font-bold text-slate-900 dark:text-white mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Hours</div>
+                        <div id="m-total-hours" class="text-xl font-bold text-slate-900 dark:text-white mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Minutes</div>
+                        <div id="m-total-minutes" class="text-xl font-bold text-slate-900 dark:text-white mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Working Days</div>
+                        <div id="m-work-days" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Weekend Days</div>
+                        <div id="m-weekend-days" class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">0</div>
+                    </div>
+                </div>
+
+                <!-- Percent Of Year / Custom Breakdown -->
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Contextual Highlights</h4>
+                    <div class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                        <div class="flex justify-between items-center">
+                            <span>Percentage of a full year:</span>
+                            <span id="m-pct-year" class="font-semibold text-brand-600 dark:text-brand-400">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                            <div id="m-pct-bar" class="bg-brand-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Add / Subtract Days -->
+        <div id="content-addsub" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-plus-minus text-brand-500"></i>
+                    Add or Subtract Time
+                </h2>
+
+                <form id="addsub-form" onsubmit="event.preventDefault(); calculateAddSub();" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Start Date & Time</label>
+                        <input type="datetime-local" id="as-start-date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                        <button type="button" onclick="setNow('as-start-date')" class="mt-1 text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline">Set to Now</button>
+                    </div>
+
+                    <!-- Operation Toggler -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Operation</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="as-op" value="add" checked onchange="calculateAddSub()" class="peer hidden">
+                                <div class="py-2.5 px-4 text-center rounded-xl border border-slate-300 dark:border-slate-600 peer-checked:bg-brand-600 peer-checked:text-white peer-checked:border-brand-600 text-sm font-semibold transition">
+                                    <i class="fa-solid fa-plus mr-1"></i> Add
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="as-op" value="sub" onchange="calculateAddSub()" class="peer hidden">
+                                <div class="py-2.5 px-4 text-center rounded-xl border border-slate-300 dark:border-slate-600 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-600 text-sm font-semibold transition">
+                                    <i class="fa-solid fa-minus mr-1"></i> Subtract
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Amount Inputs Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">Years</label>
+                            <input type="number" min="0" value="0" id="as-years" oninput="calculateAddSub()" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">Months</label>
+                            <input type="number" min="0" value="0" id="as-months" oninput="calculateAddSub()" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">Weeks</label>
+                            <input type="number" min="0" value="0" id="as-weeks" oninput="calculateAddSub()" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">Days</label>
+                            <input type="number" min="0" value="30" id="as-days" oninput="calculateAddSub()" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">Hours</label>
+                            <input type="number" min="0" value="0" id="as-hours" oninput="calculateAddSub()" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">Minutes</label>
+                            <input type="number" min="0" value="0" id="as-minutes" oninput="calculateAddSub()" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="calculateAddSub()" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-md transition">
+                        Calculate Target Date
+                    </button>
+                </form>
+            </div>
+
+            <!-- Result Box -->
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden border border-slate-800">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-semibold tracking-wider uppercase text-brand-400">Calculated Target Date</span>
+                        <button onclick="copyResultText('as-result-date')" class="text-xs bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg transition border border-slate-700">
+                            <i class="fa-regular fa-copy"></i> Copy Date
+                        </button>
+                    </div>
+                    <h3 id="as-result-date" class="text-2xl sm:text-4xl font-black text-white my-3">
+                        --
+                    </h3>
+                    <p id="as-result-day" class="text-brand-300 font-medium text-lg">
+                        --
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Day of the Year</div>
+                        <div id="as-day-of-year" class="text-lg font-bold text-slate-900 dark:text-white mt-1">--</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Week Number</div>
+                        <div id="as-week-num" class="text-lg font-bold text-slate-900 dark:text-white mt-1">--</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Is Leap Year?</div>
+                        <div id="as-leap-year" class="text-lg font-bold text-slate-900 dark:text-white mt-1">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Age Calculator -->
+        <div id="content-age" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-cake-candles text-pink-500"></i>
+                    Age & Life Breakdown
+                </h2>
+
+                <form id="age-form" onsubmit="event.preventDefault(); calculateAge();" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Date of Birth</label>
+                        <input type="date" id="age-dob" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Calculate Age At Date</label>
+                        <input type="date" id="age-target-date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                        <button type="button" onclick="setToday('age-target-date')" class="mt-1 text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline">Set to Today</button>
+                    </div>
+
+                    <button type="button" onclick="calculateAge()" class="w-full py-3 px-4 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-xl shadow-md transition">
+                        Calculate Age & Astrology
+                    </button>
+                </form>
+            </div>
+
+            <!-- Age Results -->
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-2xl p-6 shadow-xl">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-pink-200">Exact Age</span>
+                    <h3 id="age-main-result" class="text-3xl sm:text-4xl font-extrabold mt-2">
+                        0 Years, 0 Months, 0 Days
+                    </h3>
+                    <p id="age-next-bday-countdown" class="mt-3 text-sm bg-white/10 p-3 rounded-xl backdrop-blur font-medium">
+                        <i class="fa-solid fa-gift mr-1"></i> Next birthday in: --
+                    </p>
+                </div>
+
+                <!-- Life Milestones Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                        <i class="fa-solid fa-heart-pulse text-red-500 text-xl mb-1"></i>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Est. Heartbeats</div>
+                        <div id="age-heartbeats" class="text-sm font-bold text-slate-900 dark:text-white mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                        <i class="fa-solid fa-lungs text-blue-500 text-xl mb-1"></i>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Est. Breaths</div>
+                        <div id="age-breaths" class="text-sm font-bold text-slate-900 dark:text-white mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                        <i class="fa-solid fa-star text-amber-500 text-xl mb-1"></i>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Zodiac Sign</div>
+                        <div id="age-zodiac" class="text-sm font-bold text-slate-900 dark:text-white mt-1">--</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                        <i class="fa-solid fa-dragon text-emerald-500 text-xl mb-1"></i>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Chinese Zodiac</div>
+                        <div id="age-chinese-zodiac" class="text-sm font-bold text-slate-900 dark:text-white mt-1">--</div>
+                    </div>
+                </div>
+
+                <!-- Milestone Dates Table -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+                        Key Life Milestone Dates
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <tbody id="age-milestones-body" class="divide-y divide-slate-100 dark:divide-slate-700">
+                                <tr><td class="py-2 text-slate-500">10,000 Days Alive:</td><td id="m-10k-days" class="font-semibold text-slate-800 dark:text-slate-200">--</td></tr>
+                                <tr><td class="py-2 text-slate-500">20,000 Days Alive:</td><td id="m-20k-days" class="font-semibold text-slate-800 dark:text-slate-200">--</td></tr>
+                                <tr><td class="py-2 text-slate-500">50th Birthday:</td><td id="m-50th-bday" class="font-semibold text-slate-800 dark:text-slate-200">--</td></tr>
+                                <tr><td class="py-2 text-slate-500">100th Birthday:</td><td id="m-100th-bday" class="font-semibold text-slate-800 dark:text-slate-200">--</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: Business Working Days -->
+        <div id="content-business" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase text-emerald-500"></i>
+                    Business Days & Workhours
+                </h2>
+
+                <form id="business-form" onsubmit="event.preventDefault(); calculateBusinessDays();" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Start Date</label>
+                        <input type="date" id="biz-start-date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">End Date</label>
+                        <input type="date" id="biz-end-date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Weekend Days</label>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <label class="flex items-center gap-2 p-2 rounded bg-slate-50 dark:bg-slate-700/50 cursor-pointer">
+                                <input type="checkbox" value="6" class="biz-weekend-check" checked onchange="calculateBusinessDays()">
+                                <span>Saturday</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-2 rounded bg-slate-50 dark:bg-slate-700/50 cursor-pointer">
+                                <input type="checkbox" value="0" class="biz-weekend-check" checked onchange="calculateBusinessDays()">
+                                <span>Sunday</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Work Hours Per Day</label>
+                        <input type="number" id="biz-hours-per-day" value="8" min="1" max="24" oninput="calculateBusinessDays()" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm">
+                    </div>
+
+                    <button type="button" onclick="calculateBusinessDays()" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition">
+                        Calculate Working Days
+                    </button>
+                </form>
+            </div>
+
+            <!-- Business Results -->
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-6 shadow-xl">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-emerald-200">Total Working Days</span>
+                    <h3 id="biz-main-days" class="text-4xl font-black mt-2">0 Days</h3>
+                    <p id="biz-total-hours" class="text-emerald-100 mt-2 font-medium">Equivalent to 0 Working Hours</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Total Calendar Days</div>
+                        <div id="biz-cal-days" class="text-lg font-bold text-slate-900 dark:text-white mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Weekend Days Excluded</div>
+                        <div id="biz-weekend-count" class="text-lg font-bold text-rose-500 mt-1">0</div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Work Weeks</div>
+                        <div id="biz-work-weeks" class="text-lg font-bold text-brand-500 mt-1">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: Date Details -->
+        <div id="content-info" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-amber-500"></i>
+                    Single Date Inspector
+                </h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Select Date</label>
+                        <input type="date" id="info-single-date" onchange="inspectDate()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                        <button type="button" onclick="setToday('info-single-date'); inspectDate();" class="mt-1 text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline">Inspect Today</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 space-y-4">
+                    <h3 id="info-day-name" class="text-3xl font-extrabold text-brand-600 dark:text-brand-400">--</h3>
+                    <p id="info-formatted-str" class="text-slate-600 dark:text-slate-300 font-medium">--</p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-100 dark:border-slate-700 text-sm">
+                        <div>
+                            <span class="text-xs text-slate-400 block">Day of Year</span>
+                            <span id="info-day-of-year" class="font-bold text-slate-800 dark:text-slate-200">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Week Number</span>
+                            <span id="info-week-number" class="font-bold text-slate-800 dark:text-slate-200">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Leap Year</span>
+                            <span id="info-is-leap" class="font-bold text-slate-800 dark:text-slate-200">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Quarter</span>
+                            <span id="info-quarter" class="font-bold text-slate-800 dark:text-slate-200">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Season (Northern)</span>
+                            <span id="info-season" class="font-bold text-slate-800 dark:text-slate-200">--</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">Days Remaining in Year</span>
+                            <span id="info-days-left" class="font-bold text-slate-800 dark:text-slate-200">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: Recurring Schedule Generator -->
+        <div id="content-recurring" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-rotate text-purple-500"></i>
+                    Recurring Dates Generator
+                </h2>
+
+                <form id="recurring-form" onsubmit="event.preventDefault(); generateRecurringDates();" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Start Date</label>
+                        <input type="date" id="rec-start-date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Frequency</label>
+                        <select id="rec-frequency" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="biweekly">Bi-Weekly (Every 2 Weeks)</option>
+                            <option value="monthly" selected>Monthly</option>
+                            <option value="quarterly">Quarterly (Every 3 Months)</option>
+                            <option value="annually">Annually</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Number of Occurrences</label>
+                        <input type="number" id="rec-count" value="10" min="1" max="50" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm">
+                    </div>
+
+                    <button type="button" onclick="generateRecurringDates()" class="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl shadow-md transition">
+                        Generate Schedule
+                    </button>
+                </form>
+            </div>
+
+            <div class="lg:col-span-7">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Generated Dates Schedule</h3>
+                        <button onclick="exportScheduleCSV()" class="text-xs text-brand-600 dark:text-brand-400 hover:underline font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-file-csv"></i> Export CSV
+                        </button>
+                    </div>
+                    <div class="max-h-96 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-700">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-100 dark:bg-slate-700 text-xs text-slate-500 dark:text-slate-300 uppercase sticky top-0">
+                                <tr>
+                                    <th class="py-2.5 px-4">#</th>
+                                    <th class="py-2.5 px-4">Date</th>
+                                    <th class="py-2.5 px-4">Day of Week</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recurring-list-body" class="divide-y divide-slate-100 dark:divide-slate-700">
+                                <tr><td colspan="3" class="py-4 text-center text-slate-400">Click generate to view dates.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Drawer / Modal -->
+    <div id="history-drawer" class="fixed inset-y-0 right-0 max-w-md w-full bg-white dark:bg-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out border-l border-slate-200 dark:border-slate-700 flex flex-col">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+            <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-brand-500"></i> Calculation History
+            </h3>
+            <button onclick="toggleHistoryDrawer()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <div id="history-items-container" class="p-4 flex-grow overflow-y-auto space-y-3">
+            <p class="text-sm text-slate-400 text-center py-8">No calculation history yet.</p>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
+            <button onclick="clearHistory()" class="text-xs text-rose-500 hover:text-rose-600 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-trash"></i> Clear All History
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let calcHistory = JSON.parse(localStorage.getItem('chrono_calc_history') || '[]');
+
+        // Automatically detect device system theme
+        function detectSystemTheme() {
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            
+            if (prefersDark) {
+                html.classList.add('dark');
+                if (icon) icon.className = 'fa-solid fa-sun text-lg text-amber-400';
+            } else {
+                html.classList.remove('dark');
+                if (icon) icon.className = 'fa-solid fa-moon text-lg';
+            }
+        }
+
+        // Listen for system theme preference changes dynamically
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', detectSystemTheme);
+        }
+
+        window.onload = function() {
+            // Detect and set system theme on launch
+            detectSystemTheme();
+
+            // Explicitly set default active tab to Duration
+            switchTab('duration');
+
+            // Set default date values
+            const now = new Date();
+            const nowIso = formatDateTimeLocal(now);
+            const todayIso = now.toISOString().split('T')[0];
+
+            document.getElementById('dur-start-date').value = nowIso;
+            
+            // default end date: +7 days
+            let defaultEnd = new Date(now);
+            defaultEnd.setDate(defaultEnd.getDate() + 7);
+            document.getElementById('dur-end-date').value = formatDateTimeLocal(defaultEnd);
+
+            document.getElementById('as-start-date').value = nowIso;
+            
+            // Age tab defaults
+            document.getElementById('age-dob').value = '1998-05-15';
+            document.getElementById('age-target-date').value = todayIso;
+
+            // Business tab defaults
+            document.getElementById('biz-start-date').value = todayIso;
+            let defaultBizEnd = new Date();
+            defaultBizEnd.setDate(defaultBizEnd.getDate() + 30);
+            document.getElementById('biz-end-date').value = defaultBizEnd.toISOString().split('T')[0];
+
+            // Info tab default
+            document.getElementById('info-single-date').value = todayIso;
+
+            // Recurring default
+            document.getElementById('rec-start-date').value = todayIso;
+
+            // Initial calculations
+            calculateDuration();
+            calculateAddSub();
+            calculateAge();
+            calculateBusinessDays();
+            inspectDate();
+            generateRecurringDates();
+
+            updateHistoryBadge();
+            renderHistory();
+        };
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = 'fa-solid fa-moon text-lg';
+            } else {
+                html.classList.add('dark');
+                icon.className = 'fa-solid fa-sun text-lg text-amber-400';
+            }
+        }
+
+        function switchTab(tabKey) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn inactive-tab px-4 py-2.5 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800';
+            });
+
+            document.getElementById(`content-${tabKey}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabKey}`);
+            activeBtn.className = 'tab-btn active-tab px-4 py-2.5 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all bg-brand-600 text-white shadow-md shadow-brand-500/20';
+        }
+
+        function formatDateTimeLocal(d) {
+            const pad = num => String(num).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        function setNow(inputId) {
+            document.getElementById(inputId).value = formatDateTimeLocal(new Date());
+            triggerCalcForInput(inputId);
+        }
+
+        function setToday(inputId) {
+            document.getElementById(inputId).value = new Date().toISOString().split('T')[0];
+            triggerCalcForInput(inputId);
+        }
+
+        function triggerCalcForInput(id) {
+            if (id.startsWith('dur')) calculateDuration();
+            else if (id.startsWith('as')) calculateAddSub();
+            else if (id.startsWith('age')) calculateAge();
+            else if (id.startsWith('biz')) calculateBusinessDays();
+            else if (id.startsWith('info')) inspectDate();
+        }
+
+        function swapDates(id1, id2, callback) {
+            const v1 = document.getElementById(id1).value;
+            document.getElementById(id1).value = document.getElementById(id2).value;
+            document.getElementById(id2).value = v1;
+            if (callback) callback();
+        }
+
+        function copyResultText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(() => {
+                // Fallback
+                const area = document.createElement('textarea');
+                area.value = text;
+                document.body.appendChild(area);
+                area.select();
+                document.execCommand('copy');
+                document.body.removeChild(area);
+                showToast("Copied to clipboard!");
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl z-50 text-sm flex items-center gap-2 animate-bounce';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        function calculateDuration() {
+            const startVal = document.getElementById('dur-start-date').value;
+            const endVal = document.getElementById('dur-end-date').value;
+            const includeEnd = document.getElementById('dur-include-end').checked;
+
+            if (!startVal || !endVal) return;
+
+            let start = new Date(startVal);
+            let end = new Date(endVal);
+
+            if (includeEnd) {
+                end.setDate(end.getDate() + 1);
+            }
+
+            let diffMs = Math.abs(end - start);
+            
+            // Total conversions
+            let totalSecs = Math.floor(diffMs / 1000);
+            let totalMins = Math.floor(totalSecs / 60);
+            let totalHours = Math.floor(totalMins / 60);
+            let totalDays = Math.floor(totalHours / 24);
+            let totalWeeks = (totalDays / 7).toFixed(1);
+
+            // Detailed Years, Months, Days calculation
+            let d1 = new Date(Math.min(start, end));
+            let d2 = new Date(Math.max(start, end));
+
+            let years = d2.getFullYear() - d1.getFullYear();
+            let months = d2.getMonth() - d1.getMonth();
+            let days = d2.getDate() - d1.getDate();
+            let hours = d2.getHours() - d1.getHours();
+            let mins = d2.getMinutes() - d1.getMinutes();
+
+            if (mins < 0) {
+                mins += 60;
+                hours--;
+            }
+            if (hours < 0) {
+                hours += 24;
+                days--;
+            }
+            if (days < 0) {
+                months--;
+                let prevMonthLastDay = new Date(d2.getFullYear(), d2.getMonth(), 0).getDate();
+                days += prevMonthLastDay;
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            // Working days count
+            let workDays = 0;
+            let weekendDays = 0;
+            let cur = new Date(d1);
+            while (cur < d2) {
+                let dayOfWeek = cur.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    weekendDays++;
+                } else {
+                    workDays++;
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+
+            // Update UI
+            document.getElementById('dur-summary-text').innerText = `${years} Yrs, ${months} Mos, ${days} Days`;
+            document.getElementById('dur-time-breakdown').innerText = `${hours} Hours, ${mins} Minutes`;
+
+            document.getElementById('m-total-days').innerText = totalDays.toLocaleString();
+            document.getElementById('m-total-weeks').innerText = totalWeeks;
+            document.getElementById('m-total-hours').innerText = totalHours.toLocaleString();
+            document.getElementById('m-total-minutes').innerText = totalMins.toLocaleString();
+            document.getElementById('m-work-days').innerText = workDays.toLocaleString();
+            document.getElementById('m-weekend-days').innerText = weekendDays.toLocaleString();
+
+            let pctYear = Math.min(((totalDays / 365.25) * 100), 100).toFixed(1);
+            document.getElementById('m-pct-year').innerText = `${pctYear}%`;
+            document.getElementById('m-pct-bar').style.width = `${pctYear}%`;
+
+            saveHistoryItem(`Duration: ${years}y ${months}m ${days}d (${totalDays} total days)`);
+        }
+
+        function calculateAddSub() {
+            const startVal = document.getElementById('as-start-date').value;
+            if (!startVal) return;
+
+            const op = document.querySelector('input[name="as-op"]:checked').value;
+            const sign = op === 'add' ? 1 : -1;
+
+            const years = (parseInt(document.getElementById('as-years').value) || 0) * sign;
+            const months = (parseInt(document.getElementById('as-months').value) || 0) * sign;
+            const weeks = (parseInt(document.getElementById('as-weeks').value) || 0) * sign;
+            const days = (parseInt(document.getElementById('as-days').value) || 0) * sign;
+            const hours = (parseInt(document.getElementById('as-hours').value) || 0) * sign;
+            const mins = (parseInt(document.getElementById('as-minutes').value) || 0) * sign;
+
+            let result = new Date(startVal);
+            result.setFullYear(result.getFullYear() + years);
+            result.setMonth(result.getMonth() + months);
+            result.setDate(result.getDate() + (weeks * 7) + days);
+            result.setHours(result.getHours() + hours);
+            result.setMinutes(result.getMinutes() + mins);
+
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('as-result-date').innerText = result.toLocaleDateString('en-US', options);
+            document.getElementById('as-result-day').innerText = `Day of week: ${result.toLocaleDateString('en-US', { weekday: 'long' })}`;
+
+            // Info items
+            document.getElementById('as-day-of-year').innerText = getDayOfYear(result);
+            document.getElementById('as-week-num').innerText = getWeekNumber(result);
+            document.getElementById('as-leap-year').innerText = isLeapYear(result.getFullYear()) ? "Yes" : "No";
+        }
+
+        function calculateAge() {
+            const dobVal = document.getElementById('age-dob').value;
+            const targetVal = document.getElementById('age-target-date').value;
+            if (!dobVal || !targetVal) return;
+
+            const dob = new Date(dobVal);
+            const target = new Date(targetVal);
+
+            if (dob > target) {
+                document.getElementById('age-main-result').innerText = "DOB must be before target date";
+                return;
+            }
+
+            let years = target.getFullYear() - dob.getFullYear();
+            let months = target.getMonth() - dob.getMonth();
+            let days = target.getDate() - dob.getDate();
+
+            if (days < 0) {
+                months--;
+                let prevMonthLastDay = new Date(target.getFullYear(), target.getMonth(), 0).getDate();
+                days += prevMonthLastDay;
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            document.getElementById('age-main-result').innerText = `${years} Years, ${months} Months, ${days} Days`;
+
+            // Next birthday countdown
+            let nextBday = new Date(target.getFullYear(), dob.getMonth(), dob.getDate());
+            if (nextBday < target) {
+                nextBday.setFullYear(target.getFullYear() + 1);
+            }
+            let diffDaysNextBday = Math.ceil((nextBday - target) / (1000 * 60 * 60 * 24));
+            document.getElementById('age-next-bday-countdown').innerHTML = `<i class="fa-solid fa-gift mr-1"></i> Next birthday in: <strong>${diffDaysNextBday} days</strong> (${nextBday.toDateString()})`;
+
+            // Heartbeats & Breaths estimate
+            let diffMs = target - dob;
+            let totalMins = diffMs / (1000 * 60);
+            let approxHeartbeats = Math.floor(totalMins * 70); // avg 70 bpm
+            let approxBreaths = Math.floor(totalMins * 16); // avg 16 bpm
+
+            document.getElementById('age-heartbeats').innerText = (approxHeartbeats / 1e6).toFixed(1) + " M";
+            document.getElementById('age-breaths').innerText = (approxBreaths / 1e6).toFixed(1) + " M";
+
+            // Zodiacs
+            document.getElementById('age-zodiac').innerText = getZodiacSign(dob.getDate(), dob.getMonth() + 1);
+            document.getElementById('age-chinese-zodiac').innerText = getChineseZodiac(dob.getFullYear());
+
+            // Milestones
+            let d10k = new Date(dob); d10k.setDate(d10k.getDate() + 10000);
+            let d20k = new Date(dob); d20k.setDate(d20k.getDate() + 20000);
+            let d50th = new Date(dob); d50th.setFullYear(d50th.getFullYear() + 50);
+            let d100th = new Date(dob); d100th.setFullYear(d100th.getFullYear() + 100);
+
+            document.getElementById('m-10k-days').innerText = d10k.toLocaleDateString();
+            document.getElementById('m-20k-days').innerText = d20k.toLocaleDateString();
+            document.getElementById('m-50th-bday').innerText = d50th.toLocaleDateString();
+            document.getElementById('m-100th-bday').innerText = d100th.toLocaleDateString();
+        }
+
+        function calculateBusinessDays() {
+            const startVal = document.getElementById('biz-start-date').value;
+            const endVal = document.getElementById('biz-end-date').value;
+            const hoursPerDay = parseFloat(document.getElementById('biz-hours-per-day').value) || 8;
+
+            if (!startVal || !endVal) return;
+
+            let start = new Date(startVal);
+            let end = new Date(endVal);
+
+            let selectedWeekends = [];
+            document.querySelectorAll('.biz-weekend-check:checked').forEach(cb => {
+                selectedWeekends.push(parseInt(cb.value));
+            });
+
+            let workDays = 0;
+            let weekendDays = 0;
+            let cur = new Date(start);
+
+            while (cur <= end) {
+                let dayOfWeek = cur.getDay();
+                if (selectedWeekends.includes(dayOfWeek)) {
+                    weekendDays++;
+                } else {
+                    workDays++;
+                }
+                cur.setDate(cur.getDate() + 1);
+            }
+
+            let totalCalendarDays = workDays + weekendDays;
+            let totalHours = workDays * hoursPerDay;
+
+            document.getElementById('biz-main-days').innerText = `${workDays} Working Days`;
+            document.getElementById('biz-total-hours').innerText = `Equivalent to ~${totalHours.toLocaleString()} Work Hours (${hoursPerDay} hrs/day)`;
+            document.getElementById('biz-cal-days').innerText = totalCalendarDays;
+            document.getElementById('biz-weekend-count').innerText = weekendDays;
+            document.getElementById('biz-work-weeks').innerText = (workDays / 5).toFixed(1);
+        }
+
+        function inspectDate() {
+            const val = document.getElementById('info-single-date').value;
+            if (!val) return;
+
+            const d = new Date(val + "T00:00:00");
+
+            document.getElementById('info-day-name').innerText = d.toLocaleDateString('en-US', { weekday: 'long' });
+            document.getElementById('info-formatted-str').innerText = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            document.getElementById('info-day-of-year').innerText = getDayOfYear(d);
+            document.getElementById('info-week-number').innerText = getWeekNumber(d);
+            document.getElementById('info-is-leap').innerText = isLeapYear(d.getFullYear()) ? "Yes" : "No";
+
+            const q = Math.floor((d.getMonth() + 3) / 3);
+            document.getElementById('info-quarter').innerText = `Q${q}`;
+
+            // Season
+            const m = d.getMonth() + 1;
+            let season = "Winter";
+            if (m >= 3 && m <= 5) season = "Spring";
+            else if (m >= 6 && m <= 8) season = "Summer";
+            else if (m >= 9 && m <= 11) season = "Autumn / Fall";
+            document.getElementById('info-season').innerText = season;
+
+            // Days left in year
+            let endOfYear = new Date(d.getFullYear(), 11, 31);
+            let diffDays = Math.ceil((endOfYear - d) / (1000 * 60 * 60 * 24));
+            document.getElementById('info-days-left').innerText = `${diffDays} days`;
+        }
+
+        function generateRecurringDates() {
+            const startVal = document.getElementById('rec-start-date').value;
+            const freq = document.getElementById('rec-frequency').value;
+            const count = parseInt(document.getElementById('rec-count').value) || 10;
+
+            if (!startVal) return;
+
+            const tbody = document.getElementById('recurring-list-body');
+            tbody.innerHTML = '';
+
+            let cur = new Date(startVal + "T00:00:00");
+
+            for (let i = 1; i <= count; i++) {
+                const tr = document.createElement('tr');
+                tr.className = i % 2 === 0 ? 'bg-slate-50 dark:bg-slate-800/50' : '';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 font-bold text-slate-400 text-xs">${i}</td>
+                    <td class="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">${cur.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                    <td class="py-2.5 px-4 text-slate-600 dark:text-slate-400">${cur.toLocaleDateString('en-US', { weekday: 'long' })}</td>
+                `;
+                tbody.appendChild(tr);
+
+                // Increment according to frequency
+                if (freq === 'daily') cur.setDate(cur.getDate() + 1);
+                else if (freq === 'weekly') cur.setDate(cur.getDate() + 7);
+                else if (freq === 'biweekly') cur.setDate(cur.getDate() + 14);
+                else if (freq === 'monthly') cur.setMonth(cur.getMonth() + 1);
+                else if (freq === 'quarterly') cur.setMonth(cur.getMonth() + 3);
+                else if (freq === 'annually') cur.setFullYear(cur.getFullYear() + 1);
+            }
+        }
+
+        function exportScheduleCSV() {
+            const rows = document.querySelectorAll('#recurring-list-body tr');
+            if (!rows.length) return;
+
+            let csvContent = "data:text/csv;charset=utf-8,#,Date,Day of Week\n";
+            rows.forEach(r => {
+                const cols = r.querySelectorAll('td');
+                if (cols.length === 3) {
+                    csvContent += `${cols[0].innerText},"${cols[1].innerText}","${cols[2].innerText}"\n`;
+                }
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "recurring_schedule.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function saveHistoryItem(itemStr) {
+            // keep latest 15 items
+            if (calcHistory.length > 0 && calcHistory[0] === itemStr) return; // avoid duplicate
+            calcHistory.unshift(itemStr);
+            if (calcHistory.length > 15) calcHistory.pop();
+            localStorage.setItem('chrono_calc_history', JSON.stringify(calcHistory));
+            updateHistoryBadge();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-items-container');
+            if (calcHistory.length === 0) {
+                container.innerHTML = `<p class="text-sm text-slate-400 text-center py-8">No calculation history yet.</p>`;
+                return;
+            }
+            container.innerHTML = calcHistory.map((item, idx) => `
+                <div class="p-3 bg-slate-100 dark:bg-slate-700/50 rounded-xl flex justify-between items-center text-xs text-slate-800 dark:text-slate-200">
+                    <span>${item}</span>
+                    <button onclick="copyText('${item}')" class="text-slate-400 hover:text-brand-500 ml-2" title="Copy">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateHistoryBadge() {
+            const badge = document.getElementById('history-badge');
+            if (calcHistory.length > 0) {
+                badge.innerText = calcHistory.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function toggleHistoryDrawer() {
+            const drawer = document.getElementById('history-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        function clearHistory() {
+            calcHistory = [];
+            localStorage.removeItem('chrono_calc_history');
+            updateHistoryBadge();
+            renderHistory();
+        }
+
+        function copyText(str) {
+            navigator.clipboard.writeText(str);
+            showToast("Copied to clipboard!");
+        }
+
+        // Astronomical & Date Algorithms
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        function getDayOfYear(date) {
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = date - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+
+        function getWeekNumber(d) {
+            let target = new Date(d.valueOf());
+            let dayNr = (d.getDay() + 6) % 7;
+            target.setDate(target.getDate() - dayNr + 3);
+            let firstThursday = target.valueOf();
+            target.setMonth(0, 1);
+            if (target.getDay() !== 4) {
+                target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+            }
+            return 1 + Math.ceil((firstThursday - target) / 604800000);
+        }
+
+        function getZodiacSign(day, month) {
+            const zodiacs = [
+                { name: "Capricorn", cutoff: 20 },
+                { name: "Aquarius", cutoff: 19 },
+                { name: "Pisces", cutoff: 20 },
+                { name: "Aries", cutoff: 20 },
+                { name: "Taurus", cutoff: 21 },
+                { name: "Gemini", cutoff: 21 },
+                { name: "Cancer", cutoff: 23 },
+                { name: "Leo", cutoff: 23 },
+                { name: "Virgo", cutoff: 23 },
+                { name: "Libra", cutoff: 23 },
+                { name: "Scorpio", cutoff: 22 },
+                { name: "Sagittarius", cutoff: 22 }
+            ];
+            let sign = zodiacs[month - 1];
+            if (day < sign.cutoff) {
+                sign = zodiacs[(month - 2 + 12) % 12];
+            }
+            return sign.name;
+        }
+
+        function getChineseZodiac(year) {
+            const animals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monk", "Rooster", "Dog", "Pig"];
+            return animals[(year - 4) % 12];
+        }
+    </script>
+</body>
+</html>
