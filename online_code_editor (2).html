@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="si" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Web Code Editor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CodeMirror Editor Core -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closetag.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+
+    <style>
+        .CodeMirror {
+            height: 100% !important;
+            font-family: 'Fira Code', monospace, monospace;
+            font-size: 14px;
+            background-color: #0f172a !important;
+        }
+        .CodeMirror-gutters {
+            background-color: #0f172a !important;
+            border-right: 1px solid #1e293b;
+        }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-hidden">
+
+    <!-- Header / Navbar -->
+    <header class="h-14 bg-slate-950 border-b border-slate-800 px-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 text-white p-2 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-code text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base tracking-wide bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                    WebDev Studio Live
+                </h1>
+                <p class="text-xs text-slate-400">Instant HTML/CSS/JS Sandbox</p>
+            </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="flex items-center space-x-2">
+            <!-- Language Switcher -->
+            <div class="relative inline-block text-left">
+                <button id="langToggleBtn" title="Change Language / භාෂාව වෙනස් කරන්න" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 hover:text-indigo-200 rounded-md transition flex items-center gap-1.5 border border-slate-700">
+                    <i class="fa-solid fa-globe text-indigo-400"></i>
+                    <span id="currentLangLabel" class="font-medium">සිංහල</span>
+                </button>
+            </div>
+
+            <!-- Layout Toggle -->
+            <button id="layoutToggleBtn" title="Toggle Layout (Split Vertical/Horizontal)" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-md transition flex items-center gap-1.5 border border-slate-700">
+                <i class="fa-solid fa-columns"></i>
+                <span id="layoutBtnText" class="hidden sm:inline">Layout</span>
+            </button>
+
+            <!-- Reset Button -->
+            <button id="resetBtn" title="Reset Code" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 rounded-md transition flex items-center gap-1.5 border border-slate-700">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span id="resetBtnText" class="hidden sm:inline">Reset</span>
+            </button>
+
+            <!-- Download Code -->
+            <button id="downloadBtn" title="Download HTML" class="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-md transition flex items-center gap-1.5 shadow-lg shadow-indigo-600/20">
+                <i class="fa-solid fa-download"></i>
+                <span id="downloadBtnText" class="hidden sm:inline">Download HTML</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main id="mainWorkspace" class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+
+        <!-- Editors Panel (Left/Top) -->
+        <section id="editorPanel" class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950">
+            <!-- Tabs Header -->
+            <div class="flex items-center bg-slate-900 border-b border-slate-800 px-2 pt-2 gap-1 select-none shrink-0">
+                <button tab-target="html" class="tab-btn active px-4 py-2 text-xs font-semibold rounded-t-lg bg-slate-950 text-amber-400 border-t-2 border-amber-400 flex items-center gap-2 transition">
+                    <i class="fa-brands fa-html5 text-amber-500 text-sm"></i> HTML
+                </button>
+                <button tab-target="css" class="tab-btn px-4 py-2 text-xs font-semibold rounded-t-lg bg-slate-900 text-slate-400 hover:text-slate-200 flex items-center gap-2 transition">
+                    <i class="fa-brands fa-css3-alt text-sky-400 text-sm"></i> CSS
+                </button>
+                <button tab-target="js" class="tab-btn px-4 py-2 text-xs font-semibold rounded-t-lg bg-slate-900 text-slate-400 hover:text-slate-200 flex items-center gap-2 transition">
+                    <i class="fa-brands fa-js text-yellow-400 text-sm"></i> JS
+                </button>
+
+                <div class="ml-auto text-xs text-slate-500 px-2 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="liveSyncText">Live Syncing</span>
+                </div>
+            </div>
+
+            <!-- Editor Containers -->
+            <div class="flex-1 relative overflow-hidden">
+                <!-- HTML Editor -->
+                <div id="htmlEditorWrapper" class="editor-wrapper absolute inset-0">
+                    <textarea id="htmlEditor" class="hidden"></textarea>
+                </div>
+                <!-- CSS Editor -->
+                <div id="cssEditorWrapper" class="editor-wrapper absolute inset-0 hidden">
+                    <textarea id="cssEditor" class="hidden"></textarea>
+                </div>
+                <!-- JS Editor -->
+                <div id="jsEditorWrapper" class="editor-wrapper absolute inset-0 hidden">
+                    <textarea id="jsEditor" class="hidden"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview & Console Panel (Right/Bottom) -->
+        <section id="previewPanel" class="w-full md:w-1/2 h-1/2 md:h-full flex flex-col bg-slate-900">
+            <!-- Preview Header -->
+            <div class="h-9 bg-slate-950 border-b border-slate-800 px-3 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2 text-xs text-slate-400">
+                    <i class="fa-solid fa-desktop text-indigo-400"></i>
+                    <span id="livePreviewTitle" class="font-medium">Live Preview</span>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button id="clearConsoleBtn" class="text-[11px] text-slate-400 hover:text-slate-200 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+                        Clear Console
+                    </button>
+                    <span id="screenDimensions" class="text-[10px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded">
+                        100%
+                    </span>
+                </div>
+            </div>
+
+            <!-- Frame / Live View -->
+            <div class="flex-1 bg-white relative">
+                <iframe id="previewFrame" class="w-full h-full border-0" sandbox="allow-scripts allow-modals flex-grow"></iframe>
+            </div>
+
+            <!-- Embedded Console Output -->
+            <div class="h-32 bg-slate-950 border-t border-slate-800 flex flex-col shrink-0">
+                <div class="px-3 py-1 bg-slate-900 text-[11px] text-slate-400 font-mono border-b border-slate-800/60 flex items-center justify-between">
+                    <span><i class="fa-solid fa-terminal mr-1 text-slate-500"></i> <span id="consoleLogsTitle">Console Logs</span></span>
+                    <span id="logCount" class="text-[10px] bg-slate-800 px-1.5 py-0.2 rounded text-slate-400">0 logs</span>
+                </div>
+                <div id="consoleLogs" class="flex-1 p-2 font-mono text-xs overflow-y-auto space-y-1 text-slate-300">
+                    <div id="consoleDefaultMsg" class="text-slate-500 italic text-[11px]">Console output will appear here...</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- App Controller Script -->
+    <script>
+        // Starter Code Templates
+        const initialHTML = `<div class="card">
+  <h1>👋 ආයුබෝවන්! (Welcome)</h1>
+  <p>මෙය Live Code Editor එකකි. HTML, CSS, සහ JS වෙනස් කරමින් එසැනින් preview එක බලන්න.</p>
+  
+  <button id="demoBtn" class="btn">
+    <i class="fa-solid fa-bolt"></i> Click Me!
+  </button>
+  
+  <p id="outputMsg" class="msg"></p>
+</div>`;
+
+        const initialCSS = `body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  color: #f8fafc;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  max-width: 400px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin-top: 0;
+  color: #38bdf8;
+}
+
+p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.btn {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+}
+
+.msg {
+  color: #4ade80;
+  font-weight: 600;
+  margin-top: 1rem;
+}`;
+
+        const initialJS = `// Interactive JS Logic
+const button = document.getElementById('demoBtn');
+const output = document.getElementById('outputMsg');
+
+let count = 0;
+
+button.addEventListener('click', () => {
+  count++;
+  output.innerText = \`ඔබ button එක \${count} වතාවක් click කර ඇත!\`;
+  console.log(\`Button clicked. Current count: \${count}\`);
+});
+
+// Console message on startup
+console.log("Live editor ready and running!");`;
+
+        let htmlEditor, cssEditor, jsEditor;
+        let isHorizontalLayout = true;
+        let consoleCount = 0;
+        let currentLang = 'si'; // Default language: Sinhala ('si')
+
+        const translations = {
+            si: {
+                subtitle: 'තත්පරයෙන් තත්පරය HTML/CSS/JS Sandbox',
+                layout: 'Layout',
+                reset: 'Reset',
+                download: 'Download HTML',
+                liveSync: 'සහසම්බන්ධිතයි',
+                livePreview: 'Live Preview',
+                clearConsole: 'Console එක මකන්න',
+                consoleLogs: 'Console සටහන්',
+                consoleDefault: 'Console ප්‍රතිදානය මෙහි දර්ශනය වේ...',
+                consoleCleared: 'Console ප්‍රතිදානය මකන ලදී.',
+                resetConfirm: 'ඔබේ කේතයන් නැවත මුල් තත්වයට පත් කිරීමට අවශ්‍යද?',
+                langName: 'සිංහල'
+            },
+            en: {
+                subtitle: 'Instant HTML/CSS/JS Sandbox',
+                layout: 'Layout',
+                reset: 'Reset',
+                download: 'Download HTML',
+                liveSync: 'Live Syncing',
+                livePreview: 'Live Preview',
+                clearConsole: 'Clear Console',
+                consoleLogs: 'Console Logs',
+                consoleDefault: 'Console output will appear here...',
+                consoleCleared: 'Console output cleared.',
+                resetConfirm: 'Are you sure you want to reset all code to defaults?',
+                langName: 'English'
+            }
+        };
+
+        // Switch Language function
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            document.getElementById('currentLangLabel').innerText = t.langName;
+            document.getElementById('layoutBtnText').innerText = t.layout;
+            document.getElementById('resetBtnText').innerText = t.reset;
+            document.getElementById('downloadBtnText').innerText = t.download;
+            document.getElementById('liveSyncText').innerText = t.liveSync;
+            document.getElementById('livePreviewTitle').innerText = t.livePreview;
+            document.getElementById('clearConsoleBtn').innerText = t.clearConsole;
+            document.getElementById('consoleLogsTitle').innerText = t.consoleLogs;
+
+            const defaultConsoleEl = document.getElementById('consoleDefaultMsg');
+            if (defaultConsoleEl) {
+                defaultConsoleEl.innerText = t.consoleDefault;
+            }
+        }
+
+        // Initialize CodeMirror instances
+        window.onload = () => {
+            const cmOptions = {
+                theme: 'dracula',
+                lineNumbers: true,
+                autoCloseTags: true,
+                autoCloseBrackets: true,
+                tabSize: 2,
+                lineWrapping: true
+            };
+
+            htmlEditor = CodeMirror(document.getElementById('htmlEditorWrapper'), {
+                ...cmOptions,
+                value: initialHTML,
+                mode: 'htmlmixed'
+            });
+
+            cssEditor = CodeMirror(document.getElementById('cssEditorWrapper'), {
+                ...cmOptions,
+                value: initialCSS,
+                mode: 'css'
+            });
+
+            jsEditor = CodeMirror(document.getElementById('jsEditorWrapper'), {
+                ...cmOptions,
+                value: initialJS,
+                mode: 'javascript'
+            });
+
+            // Add Input Event Listeners for Instant Preview Updates
+            [htmlEditor, cssEditor, jsEditor].forEach(editor => {
+                editor.on('change', () => {
+                    updatePreview();
+                });
+            });
+
+            // Set initial UI language
+            setLanguage('si');
+
+            // First initialization update
+            updatePreview();
+
+            // Language Toggle Event Listener
+            document.getElementById('langToggleBtn').addEventListener('click', () => {
+                const nextLang = currentLang === 'si' ? 'en' : 'si';
+                setLanguage(nextLang);
+            });
+
+            // Handle Responsive View Window resizing for label
+            window.addEventListener('resize', updateDimensionsLabel);
+            updateDimensionsLabel();
+        };
+
+        // Real-time Update function
+        function updatePreview() {
+            const previewFrame = document.getElementById('previewFrame');
+            const html = htmlEditor ? htmlEditor.getValue() : initialHTML;
+            const css = cssEditor ? cssEditor.getValue() : initialCSS;
+            const js = jsEditor ? jsEditor.getValue() : initialJS;
+
+            // Override iframe console to relay messages back to UI console safely via postMessage
+            const consoleCaptureScript = `
+                <script>
+                    (function() {
+                        const originalLog = console.log;
+                        const originalError = console.error;
+                        const originalWarn = console.warn;
+
+                        function sendLog(type, args) {
+                            window.parent.postMessage({
+                                type: 'CONSOLE_LOG',
+                                logLevel: type,
+                                message: Array.from(args).map(arg => 
+                                    typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+                                ).join(' ')
+                            }, '*');
+                        }
+
+                        console.log = function(...args) {
+                            sendLog('info', args);
+                            originalLog.apply(console, args);
+                        };
+                        console.error = function(...args) {
+                            sendLog('error', args);
+                            originalError.apply(console, args);
+                        };
+                        console.warn = function(...args) {
+                            sendLog('warn', args);
+                            originalWarn.apply(console, args);
+                        };
+                    })();
+                <\/script>
+            `;
+
+            const fontAwesomeCDN = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">`;
+
+            const fullSource = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    ${fontAwesomeCDN}
+    <style>${css}</style>
+    ${consoleCaptureScript}
+</head>
+<body>
+    ${html}
+    <script>
+        try {
+            ${js}
+        } catch(err) {
+            console.error("JavaScript Error: " + err.message);
+        }
+    <\/script>
+</body>
+</html>`;
+
+            // Use srcdoc attribute to prevent cross-origin iframe domain security errors
+            previewFrame.srcdoc = fullSource;
+        }
+
+        // Handle Messages from Iframe (Console Output)
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'CONSOLE_LOG') {
+                appendConsoleLog(event.data.message, event.data.logLevel);
+            }
+        });
+
+        function appendConsoleLog(message, level = 'info') {
+            const consoleContainer = document.getElementById('consoleLogs');
+            
+            // Clear placeholder if first log
+            if (consoleCount === 0) {
+                consoleContainer.innerHTML = '';
+            }
+            consoleCount++;
+            document.getElementById('logCount').innerText = `${consoleCount} logs`;
+
+            const logEntry = document.createElement('div');
+            logEntry.className = 'flex items-start gap-2 py-0.5 font-mono text-xs border-b border-slate-900/40';
+
+            let iconClass = 'fa-info-circle text-sky-400';
+            let textColor = 'text-slate-200';
+
+            if (level === 'error') {
+                iconClass = 'fa-circle-xmark text-rose-400';
+                textColor = 'text-rose-300';
+            } else if (level === 'warn') {
+                iconClass = 'fa-triangle-exclamation text-amber-400';
+                textColor = 'text-amber-300';
+            }
+
+            logEntry.innerHTML = `
+                <i class="fa-solid ${iconClass} mt-0.5 text-xs"></i>
+                <span class="${textColor} break-all">${escapeHtml(message)}</span>
+            `;
+
+            consoleContainer.appendChild(logEntry);
+            consoleContainer.scrollTop = consoleContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;")
+                       .replace(/</g, "&lt;")
+                       .replace(/>/g, "&gt;")
+                       .replace(/"/g, "&quot;")
+                       .replace(/'/g, "&#039;");
+        }
+
+        // Tab Switching Logic
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('tab-target');
+
+                // Update tab styles
+                tabs.forEach(t => {
+                    t.classList.remove('bg-slate-950', 'text-amber-400', 'text-sky-400', 'text-yellow-400', 'border-t-2', 'border-amber-400', 'border-sky-400', 'border-yellow-400');
+                    t.classList.add('bg-slate-900', 'text-slate-400');
+                });
+
+                tab.classList.remove('bg-slate-900', 'text-slate-400');
+                tab.classList.add('bg-slate-950');
+
+                if (target === 'html') {
+                    tab.classList.add('text-amber-400', 'border-t-2', 'border-amber-400');
+                } else if (target === 'css') {
+                    tab.classList.add('text-sky-400', 'border-t-2', 'border-sky-400');
+                } else if (target === 'js') {
+                    tab.classList.add('text-yellow-400', 'border-t-2', 'border-yellow-400');
+                }
+
+                // Show corresponding editor
+                document.querySelectorAll('.editor-wrapper').forEach(w => w.classList.add('hidden'));
+                const activeWrapper = document.getElementById(`${target}EditorWrapper`);
+                activeWrapper.classList.remove('hidden');
+
+                // Refresh CodeMirror layout when switching tabs
+                if (target === 'html') htmlEditor.refresh();
+                if (target === 'css') cssEditor.refresh();
+                if (target === 'js') jsEditor.refresh();
+            });
+        });
+
+        // Toggle Split Layout (Horizontal/Vertical)
+        document.getElementById('layoutToggleBtn').addEventListener('click', () => {
+            const workspace = document.getElementById('mainWorkspace');
+            const editorPanel = document.getElementById('editorPanel');
+            const previewPanel = document.getElementById('previewPanel');
+
+            if (isHorizontalLayout) {
+                // Change to Vertical stack layout
+                workspace.classList.remove('md:flex-row');
+                workspace.classList.add('flex-col');
+                editorPanel.classList.remove('md:w-1/2', 'md:h-full', 'md:border-r');
+                editorPanel.classList.add('w-full', 'h-1/2', 'border-b');
+                previewPanel.classList.remove('md:w-1/2', 'md:h-full');
+                previewPanel.classList.add('w-full', 'h-1/2');
+            } else {
+                // Change to Side-by-Side layout
+                workspace.classList.remove('flex-col');
+                workspace.classList.add('md:flex-row');
+                editorPanel.classList.remove('w-full', 'h-1/2', 'border-b');
+                editorPanel.classList.add('md:w-1/2', 'md:h-full', 'md:border-r');
+                previewPanel.classList.remove('w-full', 'h-1/2');
+                previewPanel.classList.add('md:w-1/2', 'md:h-full');
+            }
+
+            isHorizontalLayout = !isHorizontalLayout;
+            
+            // Refresh editor rendering
+            htmlEditor.refresh();
+            cssEditor.refresh();
+            jsEditor.refresh();
+        });
+
+        // Reset Code Functionality
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            const confirmMsg = translations[currentLang].resetConfirm;
+            if (confirm(confirmMsg)) {
+                htmlEditor.setValue(initialHTML);
+                cssEditor.setValue(initialCSS);
+                jsEditor.setValue(initialJS);
+                clearConsole();
+                updatePreview();
+            }
+        });
+
+        // Clear Console
+        document.getElementById('clearConsoleBtn').addEventListener('click', clearConsole);
+
+        function clearConsole() {
+            const consoleContainer = document.getElementById('consoleLogs');
+            const clearedMsg = translations[currentLang].consoleCleared;
+            consoleContainer.innerHTML = `<div id="consoleDefaultMsg" class="text-slate-500 italic text-[11px]">${clearedMsg}</div>`;
+            consoleCount = 0;
+            document.getElementById('logCount').innerText = `0 logs`;
+        }
+
+        // Download Single HTML Bundle File
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const html = htmlEditor.getValue();
+            const css = cssEditor.getValue();
+            const js = jsEditor.getValue();
+
+            const standaloneContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exported Project</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+${css}
+    </style>
+</head>
+<body>
+${html}
+
+    <script>
+${js}
+    <\/script>
+</body>
+</html>`;
+
+            const blob = new Blob([standaloneContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        function updateDimensionsLabel() {
+            const frame = document.getElementById('previewFrame');
+            const label = document.getElementById('screenDimensions');
+            if (frame && label) {
+                label.innerText = `${frame.clientWidth}px × ${frame.clientHeight}px`;
+            }
+        }
+    </script>
+</body>
+</html>
